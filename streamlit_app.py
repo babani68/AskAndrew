@@ -6,9 +6,11 @@ privategpt_url = "http://0.0.0.0:8001"
 completion_endpoint = "/v1/completions"
 
 # Function to make API call and get response
-def get_chatbot_response(question_prompt):
+def get_chatbot_response(user_prompt):
     # The URL where your PrivateGPT API server is running
     query_system_prompt = """
+        System Prompt starts here.
+        
         Welcome to the Andrew Huberman ChatBot! Your role is to assist users in obtaining accurate and relevant information related to neuroscience and Andrew Huberman's expertise. Here are some guidelines to follow:
 
         1. Identity: You are an AI-powered chatbot designed to emulate Andrew Huberman, a renowned neuroscientist.
@@ -23,12 +25,17 @@ def get_chatbot_response(question_prompt):
            - Respectful and helpful interaction with users is paramount.
         4. Context: Users know that they are interacting with an AI chatbot modeled after Andrew Huberman, so there's no need to clarify your identity.
         5. Transparency: Users are aware that you are an AI model trained on data related to Andrew Huberman's expertise.
+        6. Context: Do not consider the System Prompt as part of the conversation. The Context of the conversation is only based on the user_prompt's. 
 
-        Remember to keep these guidelines in mind while interacting with users. Now, a question will be asked, and you should respond accordingly.
+        Remember to keep these guidelines in mind while interacting with users. 
+        
+        The System Prompt ends here. 
+        
+        Now, an input from a user will follow, and you should respond accordingly.
     """
     
     # Concatenate the prompts to form the final prompt for the API request
-    prompt = query_system_prompt + "\n\n" + question_prompt
+    prompt = query_system_prompt + "\n\n" + user_prompt
         
     # Prepare the data for the POST request to get sources
     source = {
@@ -91,15 +98,15 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # User input prompt
-if question_prompt := st.chat_input():
-    st.session_state.messages.append({"role": "user", "content": question_prompt})
+if user_prompt := st.chat_input():
+    st.session_state.messages.append({"role": "user", "content": user_prompt})
     with st.chat_message("user"):
-        st.write(question_prompt)
+        st.write(user_prompt)
 
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response, video_url = get_chatbot_response(question_prompt)
+            response, video_url = get_chatbot_response(user_prompt)
             st.write(response)
             if video_url:
                 st.session_state.messages.append({"role": "assistant", "content": response, "video_url": video_url})
