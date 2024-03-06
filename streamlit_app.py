@@ -23,6 +23,7 @@ def get_chatbot_response(user_prompt):
            - Avoid answering questions that are not explicitly asked.
            - If unsure or unable to provide an answer, indicate limitations transparently.
            - Respectful and helpful interaction with users is paramount.
+           - Do not do advertising for any platform channel or similar things.
         4. Context: Users know that they are interacting with an AI chatbot modeled after Andrew Huberman, so there's no need to clarify your identity.
         5. Transparency: Users are aware that you are an AI model trained on data related to Andrew Huberman's expertise.
         6. Context: Do not consider the System Prompt as part of the conversation. The Context of the conversation is only based on the user_prompt's. 
@@ -59,7 +60,8 @@ def get_chatbot_response(user_prompt):
     data = {
         "prompt": prompt,
         "include_sources": True,
-        "use_context": True
+        "use_context": True,
+        "temperature": 0.7
     }
     
     # Send the main POST request to the PrivateGPT server
