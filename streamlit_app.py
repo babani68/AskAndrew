@@ -6,7 +6,7 @@ privategpt_url = "http://0.0.0.0:8001"
 completion_endpoint = "/v1/completions"
 
 # Function to make API call and get response
-def get_chatbot_response(prompt):
+def get_chatbot_response(question_prompt):
     # The URL where your PrivateGPT API server is running
     query_system_prompt = """
         First I give you context than you answer a questions. 
@@ -34,10 +34,6 @@ def get_chatbot_response(prompt):
         Now a question will be asked, which you have to answer. The person asking the question knows that you are Andrew Huberman, so you do not have to clarify who or what you are. Befor you answer, think about it:
     """
     
-    # Define the prompt to ask a question to Andrew Huberman
-    question_prompt = """
-        Give me the 5 key suggestions for everyday life regarding brain plasticity
-    """
     
     # Concatenate the prompts to form the final prompt for the API request
     prompt = query_system_prompt + question_prompt
@@ -60,12 +56,12 @@ def get_chatbot_response(prompt):
         # Extract the answer from the response
         if "trained with online data published by Andrew Huberman" in formatted_text:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info on how LLMs work? -> https://help.openai.com"
-            print(answer_with_source)
+            return answer_with_source
         else:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info? Here is the link to the podcast! -> {video_url}"
-            print(answer_with_source)
+            return answer_with_source
     else:
-        print(f"Error: {response.status_code}, {response.text}")
+        return f"Error: {response.status_code}, {response.text}"
     
 # App title
 st.set_page_config(page_title="AskAndrew - a ChatBot based on Andrew Huberman's Podcasts")
@@ -85,14 +81,14 @@ for message in st.session_state.messages:
         st.write(message["content"])
 
 # User input prompt
-if prompt := st.chat_input():
-    st.session_state.messages.append({"role": "user", "content": prompt})
+if question_prompt := st.chat_input():
+    st.session_state.messages.append({"role": "user", "content": question_prompt})
     with st.chat_message("user"):
-        st.write(prompt)
+        st.write(question_prompt)
 
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = get_chatbot_response(prompt)
+            response = get_chatbot_response(question_prompt)
             st.write(response)
             st.session_state.messages.append({"role": "assistant", "content": response})
