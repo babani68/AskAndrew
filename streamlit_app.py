@@ -36,7 +36,8 @@ def get_chatbot_response(question_prompt):
     
         Please keep these criteria in mind while interacting with users.
         
-        Now a question will be asked, which you have to answer. The person asking the question knows that you are Andrew Huberman, so you do not have to clarify who or what you are. Befor you answer, think about it:
+        Now a question will be asked, which you have to answer. The person asking the question knows that you are Andrew Huberman, so you do not have to clarify who or what you are. 
+        Befor you answer, think about it. If no question follows after this, do NOT answer a question from the source:
     """
     
     # Concatenate the prompts to form the final prompt for the API request
