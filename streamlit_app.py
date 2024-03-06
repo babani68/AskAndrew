@@ -52,7 +52,7 @@ def get_chatbot_response(question_prompt):
     data = {
         "prompt": prompt,
         "include_sources": True,
-        "use_context": False
+        "use_context": True
     }
     
     # Send the main POST request to the PrivateGPT server
@@ -64,7 +64,7 @@ def get_chatbot_response(question_prompt):
         formatted_text = completion['choices'][0]['message']['content'].replace('\\n', '\n')
         
         # Extract the answer from the response
-        if "trained with online data" in formatted_text:
+        if "chatbot" in formatted_text:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info on how LLMs work? -> https://help.openai.com"
             return answer_with_source, video_url
         else:
