@@ -6,7 +6,7 @@ privategpt_url = "http://0.0.0.0:8001"
 completion_endpoint = "/v1/completions"
 
 # Function to make API call and get response
-def get_chatbot_response(user_prompt, context_prompt):
+def get_chatbot_response(user_prompt):
     # The URL where your PrivateGPT API server is running
     query_system_prompt = """
         System Prompt starts here.
@@ -39,8 +39,8 @@ def get_chatbot_response(user_prompt, context_prompt):
         Now, an input from a user will follow, and you should respond accordingly.
     """
     
-   # Concatenate the prompts to form the final prompt for the API request
-    prompt = query_system_prompt + "\n\n" + context_prompt + "\n\n" + user_prompt
+    # Concatenate the prompts to form the final prompt for the API request
+    prompt = query_system_prompt + "\n\n" + user_prompt
         
     # Prepare the data for the POST request to get sources
     source = {
@@ -94,10 +94,9 @@ with st.sidebar:
     st.title('AskAndrew')
     # Include your login credentials code here
 
-# Store chat messages and context
+# Store chat messages
 if "messages" not in st.session_state.keys():
     st.session_state.messages = [{"role": "assistant", "content": "How may I help you?"}]
-    st.session_state.context = ""
 
 # Display chat messages
 for message in st.session_state.messages:
@@ -106,8 +105,6 @@ for message in st.session_state.messages:
 
 # User input prompt
 if user_prompt := st.chat_input():
-    # Update context
-    st.session_state.context += "\n\n" + user_prompt
     st.session_state.messages.append({"role": "user", "content": user_prompt})
     with st.chat_message("user"):
         st.write(user_prompt)
@@ -115,7 +112,7 @@ if user_prompt := st.chat_input():
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response, video_url = get_chatbot_response(user_prompt, st.session_state.context)
+            response, video_url = get_chatbot_response(user_prompt)
             st.write(response)
             if video_url:
                 st.session_state.messages.append({"role": "assistant", "content": response, "video_url": video_url})
