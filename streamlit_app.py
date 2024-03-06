@@ -64,7 +64,7 @@ def get_chatbot_response(user_prompt):
         "prompt": prompt,
         "include_sources": True,
         "use_context": True,
-        "temperature": 0.7
+        "temperature": 0.5
     }
     
     # Send the main POST request to the PrivateGPT server
