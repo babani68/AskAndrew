@@ -40,33 +40,49 @@ def get_chatbot_response(question_prompt):
     # Concatenate the prompts to form the final prompt for the API request
     prompt = query_system_prompt + "\n\n" + question_prompt
     
-    # Prepare the data for the POST request
-    data = {
+    # Prepare the data for the POST request to get sources
+    source = {
         "prompt": prompt,
         "include_sources": True,
         "use_context": True
     }
     
-    # Send the POST request to the PrivateGPT server
+    # Send the POST request to the PrivateGPT server to get sources
+    file_response = requests.post(privategpt_url + completion_endpoint, json=source)
+    
+    # Extract video ID from the response
+    if file_response.status_code == 200:
+        file_json = file_response.json()
+        video_id = file_json['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
+        video_url = f'https://www.youtube.com/watch?v={video_id}'
+    else:
+        video_url = None
+    
+    # Prepare the data for the main POST request
+    data = {
+        "prompt": prompt,
+        "include_sources": True,
+        "use_context": False
+    }
+    
+    # Send the main POST request to the PrivateGPT server
     response = requests.post(privategpt_url + completion_endpoint, json=data)
     
     # Process the response
     if response.status_code == 200:
         completion = response.json()
         formatted_text = completion['choices'][0]['message']['content'].replace('\\n', '\n')
-        video_id = completion['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
-        video_url = f'https://www.youtube.com/watch?v={video_id}'
         
         # Extract the answer from the response
         if "trained with online data published by Andrew Huberman" in formatted_text:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info on how LLMs work? -> https://help.openai.com"
-            return answer_with_source
+            return answer_with_source, video_url
         else:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info? Here is the link to the podcast! -> {video_url}"
-            return answer_with_source
+            return answer_with_source, video_url
     else:
-        return f"Error: {response.status_code}, {response.text}"
-    
+        return f"Error: {response.status_code}, {response.text}", None
+
 # App title
 st.set_page_config(page_title="AskAndrew - a ChatBot based on Andrew Huberman's Podcasts")
 
@@ -93,6 +109,7 @@ if question_prompt := st.chat_input():
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response = get_chatbot_response(question_prompt)
+            response, video_url = get_chatbot_response(question_prompt)
             st.write(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+            if video_url:
+                st.session_state.messages.append({"role": "assistant", "content": response, "video_url": video_url})
