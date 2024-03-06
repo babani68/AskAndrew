@@ -34,9 +34,8 @@ def get_chatbot_response(question_prompt):
         Now a question will be asked, which you have to answer. The person asking the question knows that you are Andrew Huberman, so you do not have to clarify who or what you are. Befor you answer, think about it:
     """
     
-    
     # Concatenate the prompts to form the final prompt for the API request
-    prompt = query_system_prompt + question_prompt
+    prompt = query_system_prompt + "\n\n" + question_prompt
     
     # Prepare the data for the POST request
     data = {
@@ -47,12 +46,14 @@ def get_chatbot_response(question_prompt):
     
     # Send the POST request to the PrivateGPT server
     response = requests.post(privategpt_url + completion_endpoint, json=data)
+    
     # Process the response
     if response.status_code == 200:
         completion = response.json()
         formatted_text = completion['choices'][0]['message']['content'].replace('\\n', '\n')
         video_id = completion['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
         video_url = f'https://www.youtube.com/watch?v={video_id}'
+        
         # Extract the answer from the response
         if "trained with online data published by Andrew Huberman" in formatted_text:
             answer_with_source = f"{formatted_text.strip()}\n\nNeed more info on how LLMs work? -> https://help.openai.com"
