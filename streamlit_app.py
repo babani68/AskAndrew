@@ -17,6 +17,7 @@ def get_chatbot_response(question_prompt):
         Do not speculate or make up information.
         NEVER answer a question or give information that is not explicitly asked in question_prompt.
         ONLY consider questions that come after the query_system_prompt.
+        Never take out questions from the podcast and answer them unasked.
         If information is not provided in the data provided, i.e. podcast, give a standard answer that you are not capable of answering that question.
         If someone specifically asks about your humanity or if you are the real Andrew Huberman, give him context regarding you being an LLM trained with online data published by Andrew Huberman.
         Never give instructions or context in your answers.
