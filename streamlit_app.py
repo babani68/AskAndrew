@@ -115,7 +115,7 @@ if user_prompt := st.chat_input():
     # Generate response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
-            response, video_url = get_chatbot_response(user_prompt)
+            response, video_url = get_chatbot_response(user_prompt, context_prompt)
             st.write(response)
             if video_url:
                 st.session_state.messages.append({"role": "assistant", "content": response, "video_url": video_url})
