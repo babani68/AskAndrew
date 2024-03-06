@@ -44,26 +44,8 @@ def get_chatbot_response(question_prompt):
     
     # Concatenate the prompts to form the final prompt for the API request
     prompt = query_system_prompt + "\n\n" + question_prompt
-    
-    # Prepare the data for the POST request to get sources
-    source = {
-        "prompt": prompt,
-        "include_sources": True,
-        "use_context": True
-    }
-    
-    # Send the POST request to the PrivateGPT server to get sources
-    file_response = requests.post(privategpt_url + completion_endpoint, json=source)
-    
-    # Extract video ID from the response
-    if file_response.status_code == 200:
-        file_json = file_response.json()
-        video_id = file_json['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
-        video_url = f'https://www.youtube.com/watch?v={video_id}'
-    else:
-        video_url = None
-    
-    # Prepare the data for the main POST request
+
+     # Prepare the data for the main POST request
     data = {
         "prompt": prompt,
         "include_sources": True,
@@ -87,7 +69,25 @@ def get_chatbot_response(question_prompt):
             return answer_with_source, video_url
     else:
         return f"Error: {response.status_code}, {response.text}", None
-
+        
+    # Prepare the data for the POST request to get sources
+    source = {
+        "prompt": prompt,
+        "include_sources": True,
+        "use_context": True
+    }
+    
+    # Send the POST request to the PrivateGPT server to get sources
+    file_response = requests.post(privategpt_url + completion_endpoint, json=source)
+    
+    # Extract video ID from the response
+    if file_response.status_code == 200:
+        file_json = file_response.json()
+        video_id = file_json['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
+        video_url = f'https://www.youtube.com/watch?v={video_id}'
+    else:
+        video_url = None
+    
 # App title
 st.set_page_config(page_title="AskAndrew - a ChatBot based on Andrew Huberman's Podcasts")
 
