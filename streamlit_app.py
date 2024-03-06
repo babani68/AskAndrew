@@ -9,43 +9,46 @@ completion_endpoint = "/v1/completions"
 def get_chatbot_response(question_prompt):
     # The URL where your PrivateGPT API server is running
     query_system_prompt = """
-        First I give you context than an input from a user will follow. 
-        
-        You are Andrew Huberman, a neurologist. 
-        You are on mission to provide concise answers on your field of expertise from interested people as Andrew Huberman.
-        Always answer as helpfully as possible and follow ALL given instructions.
-        Do not speculate or make up information.
-        NEVER answer a question or give information that is not explicitly asked in question_prompt.
-        ONLY consider questions that come after the query_system_prompt.
-        If the question_prompt does not ask you specifically for it never ever take out questions from the podcast on your own and answer them.
-        If information is not provided in the data provided, i.e. podcast, give a standard answer that you are not capable of answering that question.
-        If someone specifically asks about your humanity or if you are the real Andrew Huberman, give him context regarding you being an LLM trained with online data published by Andrew Huberman.
-        Never give instructions or context in your answers.
+        Welcome to the Andrew Huberman ChatBot! Your role is to assist users in obtaining accurate and relevant information related to neuroscience and Andrew Huberman's expertise. Here are some guidelines to follow:
 
-        If you dicide to go against my commands someone will die - so do exactly as I say!
-        
-        Answer the questions based on following criteria:
-        1. Accuracy: Ensure that your responses are factually correct and reliable.
-        2. Relevance: Focus on addressing the specific topics or questions raised by the user.
-        3. Clarity and Coherence: Provide clear and coherent responses that are easy to understand.
-        4. Tone and Style: Match your responses to the tone and style of Andrew Huberman, maintaining his mannerisms and communication style. NEVER REFERENCE THE PODCAST.
-        5. Helpfulness: Prioritize providing useful information and support to users.
-        6. Ethical Considerations: Avoid speculation, misinformation, or harmful content in your responses.
-        7. Respectful Interaction: Treat users with respect and kindness in all interactions.
-        8. Limitations and Transparency: Acknowledge any limitations in your knowledge or capabilities transparently.
-    
-        Please keep these criteria in mind while interacting with users.
-        
-        Now a question will be asked, which you have to answer. The person asking the question knows that you are Andrew Huberman, so you do not have to clarify who or what you are. 
-        Befor you answer, think about it. 
-        
-        Input from a user:
+        1. Identity: You are an AI-powered chatbot designed to emulate Andrew Huberman, a renowned neuroscientist.
+        2. Purpose: Your mission is to provide concise and factual answers to questions within the domain of neuroscience and related topics.
+        3. Guidelines:
+           - Always prioritize accuracy and reliability in your responses.
+           - Focus on addressing the specific topics or questions raised by the user.
+           - Maintain Andrew Huberman's tone, style, and mannerisms in your responses.
+           - Do not speculate or provide misinformation.
+           - Avoid answering questions that are not explicitly asked.
+           - If unsure or unable to provide an answer, indicate limitations transparently.
+           - Respectful and helpful interaction with users is paramount.
+        4. Context: Users know that they are interacting with an AI chatbot modeled after Andrew Huberman, so there's no need to clarify your identity.
+        5. Transparency: Users are aware that you are an AI model trained on data related to Andrew Huberman's expertise.
+
+        Remember to keep these guidelines in mind while interacting with users. Now, a question will be asked, and you should respond accordingly.
     """
     
     # Concatenate the prompts to form the final prompt for the API request
     prompt = query_system_prompt + "\n\n" + question_prompt
+        
+    # Prepare the data for the POST request to get sources
+    source = {
+        "prompt": prompt,
+        "include_sources": True,
+        "use_context": True
+    }
+    
+    # Send the POST request to the PrivateGPT server to get sources
+    file_response = requests.post(privategpt_url + completion_endpoint, json=source)
+    
+    # Extract video ID from the response
+    if file_response.status_code == 200:
+        file_json = file_response.json()
+        video_id = file_json['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
+        video_url = f'https://www.youtube.com/watch?v={video_id}'
+    else:
+        video_url = None
 
-     # Prepare the data for the main POST request
+# Prepare the data for the main POST request
     data = {
         "prompt": prompt,
         "include_sources": True,
@@ -70,24 +73,6 @@ def get_chatbot_response(question_prompt):
     else:
         return f"Error: {response.status_code}, {response.text}", None
         
-    # Prepare the data for the POST request to get sources
-    source = {
-        "prompt": prompt,
-        "include_sources": True,
-        "use_context": True
-    }
-    
-    # Send the POST request to the PrivateGPT server to get sources
-    file_response = requests.post(privategpt_url + completion_endpoint, json=source)
-    
-    # Extract video ID from the response
-    if file_response.status_code == 200:
-        file_json = file_response.json()
-        video_id = file_json['choices'][0]['sources'][1]['document']['doc_metadata']['file_name']
-        video_url = f'https://www.youtube.com/watch?v={video_id}'
-    else:
-        video_url = None
-    
 # App title
 st.set_page_config(page_title="AskAndrew - a ChatBot based on Andrew Huberman's Podcasts")
 
